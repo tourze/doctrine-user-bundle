@@ -1,0 +1,1 @@
+# doctrine-user-bundle
