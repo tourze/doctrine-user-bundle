@@ -15,7 +15,9 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\DoctrineEntityCheckerBundle\Checker\EntityCheckerInterface;
 use Tourze\DoctrineHelper\ReflectionHelper;
+use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreateUserColumn;
+use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdateUserColumn;
 
 /**
@@ -26,10 +28,10 @@ use Tourze\DoctrineUserBundle\Attribute\UpdateUserColumn;
 class UserListener implements EntityCheckerInterface
 {
     public function __construct(
-        private readonly LoggerInterface $logger,
         private readonly Security $security,
         #[Autowire(service: 'doctrine-user.property-accessor')] private readonly PropertyAccessor $propertyAccessor,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -56,20 +58,28 @@ class UserListener implements EntityCheckerInterface
 
     public function prePersistEntity(ObjectManager $objectManager, object $entity): void
     {
-        if (!$this->getUser()) {
+        $user = $this->getUser();
+        if (!$user) {
             return;
         }
 
         foreach (ReflectionHelper::getProperties($entity, \ReflectionProperty::IS_PRIVATE) as $property) {
-            if (empty($property->getAttributes(CreateUserColumn::class))) {
-                continue;
+            foreach ($property->getAttributes(CreateUserColumn::class) as $attribute) {
+                $this->logger?->debug('设置创建用户对象', [
+                    'className' => $entity::class,
+                    'entity' => $entity,
+                    'user' => $user,
+                ]);
+                $this->propertyAccessor->setValue($entity, $property->getName(), $user);
             }
-            $this->logger->debug('设置创建用户', [
-                'className' => $entity::class,
-                'entity' => $entity,
-                'user' => $this->getUser(),
-            ]);
-            $this->propertyAccessor->setValue($entity, $property->getName(), $this->getUser());
+            foreach ($property->getAttributes(CreatedByColumn::class) as $attribute) {
+                $this->logger?->debug('设置创建用户标识', [
+                    'className' => $entity::class,
+                    'entity' => $entity,
+                    'user' => $user,
+                ]);
+                $this->propertyAccessor->setValue($entity, $property->getName(), $user->getUserIdentifier());
+            }
         }
     }
 
@@ -83,21 +93,27 @@ class UserListener implements EntityCheckerInterface
 
     public function preUpdateEntity(ObjectManager $objectManager, object $entity, PreUpdateEventArgs $eventArgs): void
     {
-        if (!$this->getUser()) {
+        $user = $this->getUser();
+        if (!$user) {
             return;
         }
 
-        if ($this->entityManager->getUnitOfWork()->isInIdentityMap($this->getUser())) {
-            foreach (ReflectionHelper::getProperties($entity, \ReflectionProperty::IS_PRIVATE) as $property) {
-                if (empty($property->getAttributes(UpdateUserColumn::class))) {
-                    continue;
-                }
-                $this->logger->debug('设置更新用户', [
+        foreach (ReflectionHelper::getProperties($entity, \ReflectionProperty::IS_PRIVATE) as $property) {
+            foreach ($property->getAttributes(UpdateUserColumn::class) as $attribute) {
+                $this->logger?->debug('设置更新用户对象', [
                     'className' => $entity::class,
                     'entity' => $entity,
-                    'user' => $this->getUser(),
+                    'user' => $user,
                 ]);
-                $this->propertyAccessor->setValue($entity, $property->getName(), $this->getUser());
+                $this->propertyAccessor->setValue($entity, $property->getName(), $user);
+            }
+            foreach ($property->getAttributes(UpdatedByColumn::class) as $attribute) {
+                $this->logger?->debug('设置更新用户标识', [
+                    'className' => $entity::class,
+                    'entity' => $entity,
+                    'user' => $user,
+                ]);
+                $this->propertyAccessor->setValue($entity, $property->getName(), $user->getUserIdentifier());
             }
         }
     }
