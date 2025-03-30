@@ -1,18 +1,23 @@
 # Doctrine User Bundle
 
-一个用于自动记录实体创建者和更新者的 Symfony Bundle。
+[English](README.md) | [中文](README.zh-CN.md)
+
+[![Latest Version](https://img.shields.io/packagist/v/tourze/doctrine-user-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/doctrine-user-bundle)
+[![Total Downloads](https://img.shields.io/packagist/dt/tourze/doctrine-user-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/doctrine-user-bundle)
+[![License](https://img.shields.io/github/license/tourze/doctrine-user-bundle.svg?style=flat-square)](LICENSE)
 
 A Symfony Bundle for automatically tracking entity creators and updaters.
 
-## 简介 | Introduction
+## Features
 
-Doctrine User Bundle 为 Symfony 应用程序提供了一种简单的方式来记录谁创建或更新了实体。通过使用属性（Attributes），您可以轻松地为实体添加用户跟踪功能。
+- Automatically track entity creators and updaters
+- Simple integration using PHP 8 Attributes
+- Works with Symfony Security component
+- No database schema modifications required
+- Compatible with Symfony 6.4+ applications
+- Zero configuration required
 
-Doctrine User Bundle provides a simple way to record who created or updated entities in Symfony applications. By using attributes, you can easily add user tracking functionality to your entities.
-
-## 安装 | Installation
-
-使用 Composer 安装此包：
+## Installation
 
 Install this package via Composer:
 
@@ -20,9 +25,13 @@ Install this package via Composer:
 composer require tourze/doctrine-user-bundle
 ```
 
-## 配置 | Configuration
+## Requirements
 
-在您的 Symfony 项目中，确保 bundle 注册在 `config/bundles.php` 文件中：
+- PHP 8.1+
+- Symfony 6.4+ or 7.1+
+- Doctrine ORM
+
+## Configuration
 
 In your Symfony project, ensure the bundle is registered in the `config/bundles.php` file:
 
@@ -33,9 +42,11 @@ return [
 ];
 ```
 
-## 使用方法 | Usage
+The bundle will be automatically configured with sensible defaults.
 
-在实体类中，使用 `CreateUserColumn` 和 `UpdateUserColumn` 属性来标记用户字段：
+## Usage
+
+### Basic Usage
 
 In your entity classes, use the `CreateUserColumn` and `UpdateUserColumn` attributes to mark user fields:
 
@@ -76,27 +87,23 @@ class YourEntity
 }
 ```
 
-当实体被创建或更新时，标记的字段将自动设置为当前登录的用户。
-
 When an entity is created or updated, the marked fields will automatically be set to the currently logged-in user.
 
-## 依赖项 | Dependencies
+### Alternative Attributes
 
-此包依赖于以下组件：
-This package depends on the following components:
+The bundle also provides additional attributes for more specific use cases:
 
-- PHP 8.1+
-- doctrine/doctrine-bundle
-- symfony/framework-bundle
-- symfony/property-access
-- symfony/security-bundle
-- symfony/yaml
-- tourze/doctrine-helper
-- tourze/bundle-dependency
-- tourze/doctrine-entity-checker-bundle
+- `CreatedByColumn`: Records only the essential information about the creator
+- `UpdatedByColumn`: Records only the essential information about the updater
 
-## 许可证 | License
+## How It Works
 
-此项目基于 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+This bundle leverages Doctrine's event system to automatically set the user fields when entities are persisted or updated. The `UserListener` class subscribes to Doctrine's `prePersist` and `preUpdate` events and sets the appropriate user fields based on the current security context.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
