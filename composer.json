@@ -1,6 +1,6 @@
 {
   "name": "tourze/doctrine-user-bundle",
-  "description": "Doctrine User Bundle",
+  "description": "Doctrine模块，自动处理用户相关",
   "license": "MIT",
   "require": {
     "php": "^8.1",
