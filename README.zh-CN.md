@@ -98,7 +98,8 @@ class YourEntity
 
 ## 工作原理
 
-此 bundle 利用 Doctrine 的事件系统来自动设置实体被持久化或更新时的用户字段。`UserListener` 类订阅了 Doctrine 的 `prePersist` 和 `preUpdate` 事件，并根据当前安全上下文设置相应的用户字段。
+此 bundle 利用 Doctrine 的事件系统来自动设置实体被持久化或更新时的用户字段。`UserListener` 类订阅了 Doctrine 的
+`prePersist` 和 `preUpdate` 事件，并根据当前安全上下文设置相应的用户字段。
 
 ## 贡献
 

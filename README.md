@@ -98,7 +98,9 @@ The bundle also provides additional attributes for more specific use cases:
 
 ## How It Works
 
-This bundle leverages Doctrine's event system to automatically set the user fields when entities are persisted or updated. The `UserListener` class subscribes to Doctrine's `prePersist` and `preUpdate` events and sets the appropriate user fields based on the current security context.
+This bundle leverages Doctrine's event system to automatically set the user fields when entities are persisted or
+updated. The `UserListener` class subscribes to Doctrine's `prePersist` and `preUpdate` events and sets the appropriate
+user fields based on the current security context.
 
 ## Contributing
 
