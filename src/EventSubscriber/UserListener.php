@@ -73,12 +73,14 @@ class UserListener implements EntityCheckerInterface
                 $this->propertyAccessor->setValue($entity, $property->getName(), $user);
             }
             foreach ($property->getAttributes(CreatedByColumn::class) as $attribute) {
+                $userIdentifier = $user->getUserIdentifier();
                 $this->logger?->debug('设置创建用户标识', [
                     'className' => $entity::class,
                     'entity' => $entity,
                     'user' => $user,
+                    'userIdentifier' => $userIdentifier,
                 ]);
-                $this->propertyAccessor->setValue($entity, $property->getName(), $user->getUserIdentifier());
+                $this->propertyAccessor->setValue($entity, $property->getName(), $userIdentifier);
             }
         }
     }
@@ -108,12 +110,14 @@ class UserListener implements EntityCheckerInterface
                 $this->propertyAccessor->setValue($entity, $property->getName(), $user);
             }
             foreach ($property->getAttributes(UpdatedByColumn::class) as $attribute) {
+                $userIdentifier = $user->getUserIdentifier();
                 $this->logger?->debug('设置更新用户标识', [
                     'className' => $entity::class,
                     'entity' => $entity,
                     'user' => $user,
+                    'userIdentifier' => $userIdentifier,
                 ]);
-                $this->propertyAccessor->setValue($entity, $property->getName(), $user->getUserIdentifier());
+                $this->propertyAccessor->setValue($entity, $property->getName(), $userIdentifier);
             }
         }
     }
