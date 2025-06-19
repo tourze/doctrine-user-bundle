@@ -24,7 +24,6 @@ class DoctrineUserBundleTest extends TestCase
     {
         $dependencies = DoctrineUserBundle::getBundleDependencies();
 
-        $this->assertIsArray($dependencies);
         $this->assertArrayHasKey(DoctrineEntityCheckerBundle::class, $dependencies);
         $this->assertEquals(['all' => true], $dependencies[DoctrineEntityCheckerBundle::class]);
     }

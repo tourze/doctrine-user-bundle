@@ -54,21 +54,27 @@ class AttributeTest extends TestCase
         // 创建一个带有测试属性的匿名类
         $testClass = new class {
             #[CreateUserColumn]
-            private $createdByUser;
+            public $createdByUser = null;
 
             #[CreatedByColumn]
-            private $createdBy;
+            public $createdBy = null;
 
             #[UpdateUserColumn]
-            private $updatedByUser;
+            public $updatedByUser = null;
 
             #[UpdatedByColumn]
-            private $updatedBy;
+            public $updatedBy = null;
         };
 
         // 通过反射获取属性
         $reflection = new \ReflectionClass($testClass);
         $properties = $reflection->getProperties();
+        
+        // 访问属性以避免未使用警告
+        $this->assertNull($testClass->createdByUser);
+        $this->assertNull($testClass->createdBy);
+        $this->assertNull($testClass->updatedByUser);
+        $this->assertNull($testClass->updatedBy);
 
         // 验证每个属性都有相应的属性标记
         $this->assertAttributeExists($properties, 'createdByUser', CreateUserColumn::class);

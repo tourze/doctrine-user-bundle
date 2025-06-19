@@ -39,7 +39,7 @@ class UserListener implements EntityCheckerInterface
     {
         $user = $this->security->getUser();
         if (
-            $user
+            $user !== null
             && method_exists($user, 'getId')
             && $this->entityManager->getUnitOfWork()->isInIdentityMap($user) // 不知道为什么，有时候这个对象会脱离UOW，我们临时做一些fallback处理
         ) {
@@ -50,7 +50,7 @@ class UserListener implements EntityCheckerInterface
 
     public function prePersist(PrePersistEventArgs $args): void
     {
-        if (!$this->getUser()) {
+        if ($this->getUser() === null) {
             return;
         }
         $this->prePersistEntity($args->getObjectManager(), $args->getObject());
@@ -59,14 +59,14 @@ class UserListener implements EntityCheckerInterface
     public function prePersistEntity(ObjectManager $objectManager, object $entity): void
     {
         $user = $this->getUser();
-        if (!$user) {
+        if ($user === null) {
             return;
         }
 
         foreach (ReflectionHelper::getProperties($entity, \ReflectionProperty::IS_PRIVATE) as $property) {
             foreach ($property->getAttributes(CreateUserColumn::class) as $attribute) {
                 $this->logger?->debug('设置创建用户对象', [
-                    'className' => $entity::class,
+                    'className' => get_class($entity),
                     'entity' => $entity,
                     'user' => $user,
                 ]);
@@ -75,7 +75,7 @@ class UserListener implements EntityCheckerInterface
             foreach ($property->getAttributes(CreatedByColumn::class) as $attribute) {
                 $userIdentifier = $user->getUserIdentifier();
                 $this->logger?->debug('设置创建用户标识', [
-                    'className' => $entity::class,
+                    'className' => get_class($entity),
                     'entity' => $entity,
                     'user' => $user,
                     'userIdentifier' => $userIdentifier,
@@ -87,7 +87,7 @@ class UserListener implements EntityCheckerInterface
 
     public function preUpdate(PreUpdateEventArgs $args): void
     {
-        if (!$this->getUser()) {
+        if ($this->getUser() === null) {
             return;
         }
         $this->preUpdateEntity($args->getObjectManager(), $args->getObject(), $args);
@@ -96,14 +96,14 @@ class UserListener implements EntityCheckerInterface
     public function preUpdateEntity(ObjectManager $objectManager, object $entity, PreUpdateEventArgs $eventArgs): void
     {
         $user = $this->getUser();
-        if (!$user) {
+        if ($user === null) {
             return;
         }
 
         foreach (ReflectionHelper::getProperties($entity, \ReflectionProperty::IS_PRIVATE) as $property) {
             foreach ($property->getAttributes(UpdateUserColumn::class) as $attribute) {
                 $this->logger?->debug('设置更新用户对象', [
-                    'className' => $entity::class,
+                    'className' => get_class($entity),
                     'entity' => $entity,
                     'user' => $user,
                 ]);
@@ -112,7 +112,7 @@ class UserListener implements EntityCheckerInterface
             foreach ($property->getAttributes(UpdatedByColumn::class) as $attribute) {
                 $userIdentifier = $user->getUserIdentifier();
                 $this->logger?->debug('设置更新用户标识', [
-                    'className' => $entity::class,
+                    'className' => get_class($entity),
                     'entity' => $entity,
                     'user' => $user,
                     'userIdentifier' => $userIdentifier,

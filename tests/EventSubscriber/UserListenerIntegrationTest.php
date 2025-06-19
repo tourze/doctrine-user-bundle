@@ -101,8 +101,9 @@ class UserListenerIntegrationTest extends TestCase
         // 检查依赖类型
         $paramTypes = [];
         foreach ($parameters as $param) {
-            if ($param->getType()) {
-                $paramTypes[] = $param->getType()->getName();
+            $type = $param->getType();
+            if ($type instanceof \ReflectionNamedType) {
+                $paramTypes[] = $type->getName();
             }
         }
 
