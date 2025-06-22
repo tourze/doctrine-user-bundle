@@ -19,8 +19,10 @@ trait CreatedByAware
         return $this->createdBy;
     }
 
-    public function setCreatedBy(string|null $createdBy): void
+    public function setCreatedBy(string|null $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 }
