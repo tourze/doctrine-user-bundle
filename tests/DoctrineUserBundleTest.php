@@ -1,30 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\DoctrineUserBundle\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Tourze\DoctrineEntityCheckerBundle\DoctrineEntityCheckerBundle;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\DoctrineUserBundle\DoctrineUserBundle;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractBundleTestCase;
 
-class DoctrineUserBundleTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(DoctrineUserBundle::class)]
+#[RunTestsInSeparateProcesses]
+final class DoctrineUserBundleTest extends AbstractBundleTestCase
 {
-    /**
-     * 测试 Bundle 可以被实例化
-     */
-    public function test_bundleCanBeInstantiated(): void
-    {
-        $bundle = new DoctrineUserBundle();
-        $this->assertInstanceOf(DoctrineUserBundle::class, $bundle);
-    }
-
-    /**
-     * 测试 Bundle 依赖关系
-     */
-    public function test_getBundleDependencies_returnsExpectedDependencies(): void
-    {
-        $dependencies = DoctrineUserBundle::getBundleDependencies();
-
-        $this->assertArrayHasKey(DoctrineEntityCheckerBundle::class, $dependencies);
-        $this->assertEquals(['all' => true], $dependencies[DoctrineEntityCheckerBundle::class]);
-    }
 }

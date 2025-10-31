@@ -1,0 +1,18 @@
+rules:
+    - Tourze\DoctrineUserBundle\PHPStan\Rules\UseUserTraitsRule
+
+parameters:
+    ignoreErrors:
+        # These traits are library exports for external consumption
+        -
+            identifier: trait.unused
+            message: '#Trait Tourze\\\\DoctrineUserBundle\\\\Traits\\\\BlameableAware is used zero times and is not analysed#'
+        -
+            identifier: trait.unused
+            message: '#Trait Tourze\\\\DoctrineUserBundle\\\\Traits\\\\CreateUserAware is used zero times and is not analysed#'
+        -
+            identifier: trait.unused
+            message: '#Trait Tourze\\\\DoctrineUserBundle\\\\Traits\\\\CreatedByAware is used zero times and is not analysed#'
+        -
+            identifier: trait.unused
+            message: '#Trait Tourze\\\\DoctrineUserBundle\\\\Traits\\\\UpdatedByAware is used zero times and is not analysed#'

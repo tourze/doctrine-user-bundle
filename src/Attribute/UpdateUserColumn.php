@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\DoctrineUserBundle\Attribute;
 
 /**
  * 记录更新用户
  */
-#[\Attribute(\Attribute::TARGET_PROPERTY)]
+#[\Attribute(flags: \Attribute::TARGET_PROPERTY)]
 class UpdateUserColumn
 {
 }

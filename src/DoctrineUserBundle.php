@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\DoctrineUserBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;

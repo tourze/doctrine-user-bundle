@@ -4,6 +4,8 @@
 
 [![Latest Version](https://img.shields.io/packagist/v/tourze/doctrine-user-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/doctrine-user-bundle)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/doctrine-user-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/doctrine-user-bundle)
+[![PHP Version Require](https://img.shields.io/packagist/php-v/tourze/doctrine-user-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/doctrine-user-bundle)
+[![Code Coverage](https://img.shields.io/codecov/c/github/tourze/doctrine-user-bundle.svg?style=flat-square)](https://codecov.io/gh/tourze/doctrine-user-bundle)
 [![License](https://img.shields.io/github/license/tourze/doctrine-user-bundle.svg?style=flat-square)](LICENSE)
 
 一个用于自动记录实体创建者和更新者的 Symfony Bundle。
@@ -30,19 +32,6 @@ composer require tourze/doctrine-user-bundle
 - PHP 8.1+
 - Symfony 6.4+ 或 7.1+
 - Doctrine ORM
-
-## 配置
-
-在您的 Symfony 项目中，确保 bundle 注册在 `config/bundles.php` 文件中：
-
-```php
-return [
-    // ...
-    Tourze\DoctrineUserBundle\DoctrineUserBundle::class => ['all' => true],
-];
-```
-
-该 bundle 将自动配置，无需额外设置。
 
 ## 使用方法
 
@@ -95,6 +84,58 @@ class YourEntity
 
 - `CreatedByColumn`：仅记录创建者的重要信息
 - `UpdatedByColumn`：仅记录更新者的重要信息
+
+## 配置
+
+在您的 Symfony 项目中，确保 bundle 注册在 `config/bundles.php` 文件中：
+
+```php
+return [
+    // ...
+    Tourze\DoctrineUserBundle\DoctrineUserBundle::class => ['all' => true],
+];
+```
+
+该 bundle 将自动配置，无需额外设置。
+
+## 高级用法
+
+### 自定义属性访问器
+
+如果您需要自定义属性访问方式，可以重写属性访问器服务：
+
+```yaml
+# config/services.yaml
+services:
+    doctrine-user.property-accessor:
+        class: Symfony\Component\PropertyAccess\PropertyAccessor
+        arguments:
+            - false  # magicCall
+            - false  # throwExceptionOnInvalidIndex
+            - 1      # cacheItemLifetime
+            - false  # magicSet
+            - false  # magicGet
+```
+
+### 日志配置
+
+该 bundle 使用 Monolog 进行日志记录。您可以配置日志通道：
+
+```yaml
+# config/packages/monolog.yaml
+monolog:
+    channels: ['doctrine_user']
+    handlers:
+        doctrine_user:
+            type: stream
+            path: '%kernel.logs_dir%/doctrine_user.log'
+            level: debug
+            channels: ['doctrine_user']
+```
+
+### 实体检查器集成
+
+该 bundle 与 `doctrine-entity-checker-bundle` 集成，提供额外的验证功能。
 
 ## 工作原理
 
