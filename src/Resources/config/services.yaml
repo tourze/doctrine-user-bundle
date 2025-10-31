@@ -9,3 +9,4 @@ services:
   doctrine-user.property-accessor:
     class: Symfony\Component\PropertyAccess\PropertyAccessor
     factory: [ 'Symfony\Component\PropertyAccess\PropertyAccess', 'createPropertyAccessor' ]
+    public: true
