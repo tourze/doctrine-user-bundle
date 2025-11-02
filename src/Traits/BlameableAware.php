@@ -31,22 +31,22 @@ trait BlameableAware
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
 
-    public function getCreatedBy(): ?string
+    final public function getCreatedBy(): ?string
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(?string $createdBy): void
+    final public function setCreatedBy(?string $createdBy): void
     {
         $this->createdBy = $createdBy;
     }
 
-    public function getUpdatedBy(): ?string
+    final public function getUpdatedBy(): ?string
     {
         return $this->updatedBy;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    final public function setUpdatedBy(?string $updatedBy): void
     {
         $this->updatedBy = $updatedBy;
     }
