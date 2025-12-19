@@ -6,7 +6,7 @@ namespace Tourze\DoctrineUserBundle\DependencyInjection;
 
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
-class DoctrineUserExtension extends AutoExtension
+final class DoctrineUserExtension extends AutoExtension
 {
     protected function getConfigDir(): string
     {

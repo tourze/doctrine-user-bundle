@@ -4,7 +4,6 @@ namespace Tourze\DoctrineUserBundle\Tests\Traits;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tourze\DoctrineUserBundle\Tests\Interfaces\CreatedByAwareTestInterface;
 use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 
 /**
@@ -13,18 +12,27 @@ use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 #[CoversClass(CreatedByAware::class)]
 final class CreatedByAwareTest extends TestCase
 {
-    private CreatedByAwareTestInterface $testEntity;
+    /**
+     * 创建测试实体
+     */
+    private function createTestEntity(): object
+    {
+        return new class {
+            use CreatedByAware;
+        };
+    }
 
     /**
      * 测试 trait 设置创建人
      */
     public function testSetCreatedBySetsCreatedBy(): void
     {
+        $testEntity = $this->createTestEntity();
         $createdBy = 'test_user';
 
-        $this->testEntity->setCreatedBy($createdBy);
+        $testEntity->setCreatedBy($createdBy);
 
-        $this->assertEquals($createdBy, $this->testEntity->getCreatedBy());
+        $this->assertEquals($createdBy, $testEntity->getCreatedBy());
     }
 
     /**
@@ -32,10 +40,11 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testGetCreatedByReturnsCreatedBy(): void
     {
+        $testEntity = $this->createTestEntity();
         $createdBy = 'test_user';
-        $this->testEntity->setCreatedBy($createdBy);
+        $testEntity->setCreatedBy($createdBy);
 
-        $result = $this->testEntity->getCreatedBy();
+        $result = $testEntity->getCreatedBy();
 
         $this->assertEquals($createdBy, $result);
     }
@@ -45,7 +54,9 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testDefaultValueIsNull(): void
     {
-        $this->assertNull($this->testEntity->getCreatedBy());
+        $testEntity = $this->createTestEntity();
+
+        $this->assertNull($testEntity->getCreatedBy());
     }
 
     /**
@@ -53,14 +64,16 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByWithNullSetsNull(): void
     {
+        $testEntity = $this->createTestEntity();
+
         // 先设置值
-        $this->testEntity->setCreatedBy('user1');
-        $this->assertEquals('user1', $this->testEntity->getCreatedBy());
+        $testEntity->setCreatedBy('user1');
+        $this->assertEquals('user1', $testEntity->getCreatedBy());
 
         // 设置为 null
-        $this->testEntity->setCreatedBy(null);
+        $testEntity->setCreatedBy(null);
 
-        $this->assertNull($this->testEntity->getCreatedBy());
+        $this->assertNull($testEntity->getCreatedBy());
     }
 
     /**
@@ -68,9 +81,11 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByWithEmptyStringSetsEmptyString(): void
     {
-        $this->testEntity->setCreatedBy('');
+        $testEntity = $this->createTestEntity();
 
-        $this->assertEquals('', $this->testEntity->getCreatedBy());
+        $testEntity->setCreatedBy('');
+
+        $this->assertEquals('', $testEntity->getCreatedBy());
     }
 
     /**
@@ -78,11 +93,12 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByWithLongStringSetsLongString(): void
     {
+        $testEntity = $this->createTestEntity();
         $longString = str_repeat('a', 255);
 
-        $this->testEntity->setCreatedBy($longString);
+        $testEntity->setCreatedBy($longString);
 
-        $this->assertEquals($longString, $this->testEntity->getCreatedBy());
+        $this->assertEquals($longString, $testEntity->getCreatedBy());
     }
 
     /**
@@ -90,23 +106,23 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByWithSpecialCharactersSetsSpecialCharacters(): void
     {
+        $testEntity = $this->createTestEntity();
         $specialChars = 'user@domain.com';
 
-        $this->testEntity->setCreatedBy($specialChars);
+        $testEntity->setCreatedBy($specialChars);
 
-        $this->assertEquals($specialChars, $this->testEntity->getCreatedBy());
+        $this->assertEquals($specialChars, $testEntity->getCreatedBy());
     }
 
     /**
      * 测试 trait 属性存在
-     * 注意：使用 Mock 对象时，我们通过检查方法存在性来验证接口契约
      */
     public function testTraitPropertyExists(): void
     {
-        $reflection = new \ReflectionClass($this->testEntity);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
 
-        $this->assertTrue($reflection->hasMethod('getCreatedBy'));
-        $this->assertTrue($reflection->hasMethod('setCreatedBy'));
+        $this->assertTrue($reflection->hasProperty('createdBy'));
     }
 
     /**
@@ -114,12 +130,8 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testTraitPropertyIsPrivate(): void
     {
-        // 创建一个真实的类来使用 trait，以便测试属性可见性
-        $testClass = new class {
-            use CreatedByAware;
-        };
-
-        $reflection = new \ReflectionClass($testClass);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
 
         $this->assertTrue($reflection->hasProperty('createdBy'));
 
@@ -132,7 +144,8 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testTraitMethodsExist(): void
     {
-        $reflection = new \ReflectionClass($this->testEntity);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
 
         $this->assertTrue($reflection->hasMethod('getCreatedBy'));
         $this->assertTrue($reflection->hasMethod('setCreatedBy'));
@@ -143,7 +156,8 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testTraitMethodsArePublic(): void
     {
-        $reflection = new \ReflectionClass($this->testEntity);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
 
         $getMethod = $reflection->getMethod('getCreatedBy');
         $setMethod = $reflection->getMethod('setCreatedBy');
@@ -157,7 +171,8 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testGetCreatedByReturnTypeIsStringOrNull(): void
     {
-        $reflection = new \ReflectionClass($this->testEntity);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
         $method = $reflection->getMethod('getCreatedBy');
         $returnType = $method->getReturnType();
 
@@ -170,7 +185,8 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByParameterTypeIsStringOrNull(): void
     {
-        $reflection = new \ReflectionClass($this->testEntity);
+        $testEntity = $this->createTestEntity();
+        $reflection = new \ReflectionClass($testEntity);
         $method = $reflection->getMethod('setCreatedBy');
         $parameters = $method->getParameters();
 
@@ -188,36 +204,15 @@ final class CreatedByAwareTest extends TestCase
      */
     public function testSetCreatedByMultipleSetOverridesPreviousValue(): void
     {
-        $this->testEntity->setCreatedBy('first_user');
-        $this->assertEquals('first_user', $this->testEntity->getCreatedBy());
+        $testEntity = $this->createTestEntity();
 
-        $this->testEntity->setCreatedBy('second_user');
-        $this->assertEquals('second_user', $this->testEntity->getCreatedBy());
+        $testEntity->setCreatedBy('first_user');
+        $this->assertEquals('first_user', $testEntity->getCreatedBy());
 
-        $this->testEntity->setCreatedBy(null);
-        $this->assertNull($this->testEntity->getCreatedBy());
-    }
+        $testEntity->setCreatedBy('second_user');
+        $this->assertEquals('second_user', $testEntity->getCreatedBy());
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // 使用 Mock 对象替代匿名类，遵循 PHPStan 建议
-        $this->testEntity = $this->createMock(CreatedByAwareTestInterface::class);
-
-        // 配置 Mock 行为以支持链式调用和属性存储
-        $createdBy = null;
-
-        $this->testEntity->method('setCreatedBy')
-            ->willReturnCallback(function (?string $value) use (&$createdBy): void {
-                $createdBy = $value;
-            })
-        ;
-
-        $this->testEntity->method('getCreatedBy')
-            ->willReturnCallback(function () use (&$createdBy) {
-                return $createdBy;
-            })
-        ;
+        $testEntity->setCreatedBy(null);
+        $this->assertNull($testEntity->getCreatedBy());
     }
 }

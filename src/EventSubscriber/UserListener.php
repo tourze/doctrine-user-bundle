@@ -13,8 +13,7 @@ use Doctrine\Persistence\ObjectManager;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\DoctrineEntityCheckerBundle\Checker\EntityCheckerInterface;
 use Tourze\DoctrineHelper\ReflectionHelper;
@@ -29,11 +28,11 @@ use Tourze\DoctrineUserBundle\Attribute\UpdateUserColumn;
 #[AsDoctrineListener(event: Events::prePersist)]
 #[AsDoctrineListener(event: Events::preUpdate)]
 #[WithMonologChannel(channel: 'doctrine_user')]
-readonly class UserListener implements EntityCheckerInterface
+final readonly class UserListener implements EntityCheckerInterface
 {
     public function __construct(
         private Security $security,
-        #[Autowire(service: 'doctrine-user.property-accessor')] private PropertyAccessor $propertyAccessor,
+        private PropertyAccessorInterface $propertyAccessor,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
     ) {

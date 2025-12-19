@@ -8,6 +8,6 @@ namespace Tourze\DoctrineUserBundle\Attribute;
  * 记录更新用户
  */
 #[\Attribute(flags: \Attribute::TARGET_PROPERTY)]
-class UpdateUserColumn
+final class UpdateUserColumn
 {
 }

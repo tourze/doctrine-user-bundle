@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\DoctrineUserBundle\Tests\Traits;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tourze\DoctrineUserBundle\Tests\Interfaces\BlameableAwareTestInterface;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 /**
@@ -13,56 +14,20 @@ use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 #[CoversClass(BlameableAware::class)]
 final class BlameableAwareTest extends TestCase
 {
-    private BlameableAwareTestInterface $testEntity;
+    private object $testEntity;
 
-    /**
-     * 测试 trait 设置创建人
-     */
-    public function testSetCreatedBySetsCreatedBy(): void
+    protected function setUp(): void
     {
-        $createdBy = 'test_user';
+        parent::setUp();
 
-        $this->testEntity->setCreatedBy($createdBy);
-
-        $this->assertEquals($createdBy, $this->testEntity->getCreatedBy());
+        // 创建一个使用 trait 的匿名类实例
+        $this->testEntity = new class {
+            use BlameableAware;
+        };
     }
 
     /**
-     * 测试 trait 获取创建人
-     */
-    public function testGetCreatedByReturnsCreatedBy(): void
-    {
-        $createdBy = 'test_user';
-        $this->testEntity->setCreatedBy($createdBy);
-
-        $this->assertEquals($createdBy, $this->testEntity->getCreatedBy());
-    }
-
-    /**
-     * 测试 trait 设置更新人
-     */
-    public function testSetUpdatedBySetsUpdatedBy(): void
-    {
-        $updatedBy = 'test_updater';
-
-        $this->testEntity->setUpdatedBy($updatedBy);
-
-        $this->assertEquals($updatedBy, $this->testEntity->getUpdatedBy());
-    }
-
-    /**
-     * 测试 trait 获取更新人
-     */
-    public function testGetUpdatedByReturnsUpdatedBy(): void
-    {
-        $updatedBy = 'test_updater';
-        $this->testEntity->setUpdatedBy($updatedBy);
-
-        $this->assertEquals($updatedBy, $this->testEntity->getUpdatedBy());
-    }
-
-    /**
-     * 测试 trait 默认值
+     * 测试默认值为 null
      */
     public function testDefaultValuesAreNull(): void
     {
@@ -71,27 +36,115 @@ final class BlameableAwareTest extends TestCase
     }
 
     /**
-     * 测试 trait 可以设置 null 值
+     * 测试设置和获取创建人
      */
-    public function testSetNullValuesWorksCorrectly(): void
+    public function testSetAndGetCreatedBy(): void
     {
-        // 先设置值
+        $createdBy = 'test_user';
+
+        $this->testEntity->setCreatedBy($createdBy);
+
+        $this->assertSame($createdBy, $this->testEntity->getCreatedBy());
+    }
+
+    /**
+     * 测试设置和获取更新人
+     */
+    public function testSetAndGetUpdatedBy(): void
+    {
+        $updatedBy = 'test_updater';
+
+        $this->testEntity->setUpdatedBy($updatedBy);
+
+        $this->assertSame($updatedBy, $this->testEntity->getUpdatedBy());
+    }
+
+    /**
+     * 测试设置 null 值
+     */
+    public function testSetNullValues(): void
+    {
+        // 先设置非空值
         $this->testEntity->setCreatedBy('user1');
         $this->testEntity->setUpdatedBy('user2');
+
+        // 验证设置成功
+        $this->assertSame('user1', $this->testEntity->getCreatedBy());
+        $this->assertSame('user2', $this->testEntity->getUpdatedBy());
 
         // 设置为 null
         $this->testEntity->setCreatedBy(null);
         $this->testEntity->setUpdatedBy(null);
 
+        // 验证 null 值
         $this->assertNull($this->testEntity->getCreatedBy());
         $this->assertNull($this->testEntity->getUpdatedBy());
     }
 
     /**
+     * 测试多次设置值
+     */
+    public function testMultipleSetOperations(): void
+    {
+        $this->testEntity->setCreatedBy('creator1');
+        $this->assertSame('creator1', $this->testEntity->getCreatedBy());
+
+        $this->testEntity->setCreatedBy('creator2');
+        $this->assertSame('creator2', $this->testEntity->getCreatedBy());
+
+        $this->testEntity->setUpdatedBy('updater1');
+        $this->assertSame('updater1', $this->testEntity->getUpdatedBy());
+
+        $this->testEntity->setUpdatedBy('updater2');
+        $this->assertSame('updater2', $this->testEntity->getUpdatedBy());
+    }
+
+    /**
+     * 测试创建人和更新人独立性
+     */
+    public function testCreatedByAndUpdatedByAreIndependent(): void
+    {
+        $this->testEntity->setCreatedBy('creator');
+        $this->testEntity->setUpdatedBy('updater');
+
+        $this->assertSame('creator', $this->testEntity->getCreatedBy());
+        $this->assertSame('updater', $this->testEntity->getUpdatedBy());
+
+        // 修改一个不影响另一个
+        $this->testEntity->setCreatedBy('new_creator');
+        $this->assertSame('new_creator', $this->testEntity->getCreatedBy());
+        $this->assertSame('updater', $this->testEntity->getUpdatedBy());
+    }
+
+    /**
      * 测试 trait 属性存在
-     * 注意：使用 Mock 对象时，我们通过检查方法存在性来验证接口契约
      */
     public function testTraitPropertiesExist(): void
+    {
+        $reflection = new \ReflectionClass($this->testEntity);
+
+        $this->assertTrue($reflection->hasProperty('createdBy'));
+        $this->assertTrue($reflection->hasProperty('updatedBy'));
+    }
+
+    /**
+     * 测试 trait 属性的可见性
+     */
+    public function testTraitPropertiesArePrivate(): void
+    {
+        $reflection = new \ReflectionClass($this->testEntity);
+
+        $createdByProperty = $reflection->getProperty('createdBy');
+        $updatedByProperty = $reflection->getProperty('updatedBy');
+
+        $this->assertTrue($createdByProperty->isPrivate());
+        $this->assertTrue($updatedByProperty->isPrivate());
+    }
+
+    /**
+     * 测试 trait 方法存在
+     */
+    public function testTraitMethodsExist(): void
     {
         $reflection = new \ReflectionClass($this->testEntity);
 
@@ -102,50 +155,24 @@ final class BlameableAwareTest extends TestCase
     }
 
     /**
-     * 测试 trait setter 方法正确设置值
+     * 测试 trait 方法是 public 且 final
      */
-    public function testSetterMethodsSetValues(): void
+    public function testTraitMethodsArePublicAndFinal(): void
     {
-        $this->testEntity->setCreatedBy('creator');
-        $this->testEntity->setUpdatedBy('updater');
+        $reflection = new \ReflectionClass($this->testEntity);
 
-        $this->assertEquals('creator', $this->testEntity->getCreatedBy());
-        $this->assertEquals('updater', $this->testEntity->getUpdatedBy());
-    }
+        $getCreatedBy = $reflection->getMethod('getCreatedBy');
+        $setCreatedBy = $reflection->getMethod('setCreatedBy');
+        $getUpdatedBy = $reflection->getMethod('getUpdatedBy');
+        $setUpdatedBy = $reflection->getMethod('setUpdatedBy');
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // 使用 Mock 对象替代匿名类，遵循 PHPStan 建议
-        $this->testEntity = $this->createMock(BlameableAwareTestInterface::class);
-
-        // 配置 Mock 行为以支持链式调用和属性存储
-        $createdBy = null;
-        $updatedBy = null;
-
-        $this->testEntity->method('setCreatedBy')
-            ->willReturnCallback(function (?string $value) use (&$createdBy): void {
-                $createdBy = $value;
-            })
-        ;
-
-        $this->testEntity->method('getCreatedBy')
-            ->willReturnCallback(function () use (&$createdBy) {
-                return $createdBy;
-            })
-        ;
-
-        $this->testEntity->method('setUpdatedBy')
-            ->willReturnCallback(function (?string $value) use (&$updatedBy): void {
-                $updatedBy = $value;
-            })
-        ;
-
-        $this->testEntity->method('getUpdatedBy')
-            ->willReturnCallback(function () use (&$updatedBy) {
-                return $updatedBy;
-            })
-        ;
+        $this->assertTrue($getCreatedBy->isPublic());
+        $this->assertTrue($getCreatedBy->isFinal());
+        $this->assertTrue($setCreatedBy->isPublic());
+        $this->assertTrue($setCreatedBy->isFinal());
+        $this->assertTrue($getUpdatedBy->isPublic());
+        $this->assertTrue($getUpdatedBy->isFinal());
+        $this->assertTrue($setUpdatedBy->isPublic());
+        $this->assertTrue($setUpdatedBy->isFinal());
     }
 }
